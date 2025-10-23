@@ -1,11 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
@@ -14,54 +11,113 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo de Usuario
-model Usuario {
-  id        String   @id @default(cuid())
-  nombre    String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ============================================
+// Better Auth Models (Authentication)
+// ============================================
 
-  habitos Habito[]
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Better Auth relations
+  sessions      Session[]
+  accounts      Account[]
+  
+  // HabitFlow relations
+  habits        Habit[]
 
-  @@map("usuarios")
+  @@map("user")
 }
 
-// Modelo de Hábito
-model Habito {
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ============================================
+// HabitFlow Models (Business Logic)
+// ============================================
+
+// Habit model
+model Habit {
   id          String   @id @default(cuid())
-  nombre      String
-  descripcion String?
-  frecuencia  String   @default("diario") // "diario", "semanal", etc.
+  name        String
+  description String?
+  frequency   String   @default("daily") // "daily", "weekly", etc.
   color       String?
-  icono       String?
-  objetivo    Int      @default(30) // Meta de días
-  activo      Boolean  @default(true)
-  usuarioId   String
+  icon        String?
+  goal        Int      @default(30) // Goal in days
+  active      Boolean  @default(true)
+  userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  usuario   Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  registros Registro[]
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  records Record[]
 
-  @@index([usuarioId])
-  @@map("habitos")
+  @@index([userId])
+  @@map("habit")
 }
 
-// Modelo de Registro diario
-model Registro {
-  id         String   @id @default(cuid())
-  fecha      DateTime @db.Date // Solo fecha, sin hora
-  completado Boolean  @default(false)
-  notas      String?
-  habitoId   String
-  createdAt  DateTime @default(now())
+// Daily tracking record
+model Record {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date // Date only, no time
+  completed Boolean  @default(false)
+  notes     String?
+  habitId   String
+  createdAt DateTime @default(now())
 
-  habito Habito @relation(fields: [habitoId], references: [id], onDelete: Cascade)
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
-  @@unique([habitoId, fecha]) // Un registro por hábito por día
-  @@index([habitoId])
-  @@index([fecha])
-  @@map("registros")
+  @@unique([habitId, date])
+  @@index([habitId])
+  @@index([date])
+  @@map("record")
 }
