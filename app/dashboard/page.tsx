@@ -41,9 +41,14 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col p-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button onClick={handleSignOut} variant="outline">
-          Sign Out
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => router.push("/profile")} variant="outline">
+            👤 Profile
+          </Button>
+          <Button onClick={handleSignOut} variant="outline">
+            Sign Out
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6">
