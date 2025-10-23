@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createHabitSchema,
+  type CreateHabitInput,
+} from "@/lib/validations/habit";
+import { useHabits } from "@/hooks/use-habits";
 import {
   Dialog,
   DialogContent,
@@ -13,147 +16,133 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type CreateHabitInput } from "@/hooks/use-habits";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldDescription,
+} from "@/components/ui/field";
 
-type HabitFormDialogProps = {
-  onSubmit: (data: CreateHabitInput) => Promise<void>;
-  trigger?: React.ReactNode;
-};
-
-export function HabitFormDialog({ onSubmit, trigger }: HabitFormDialogProps) {
+export function HabitFormDialog({ trigger }: { trigger?: React.ReactNode }) {
+  const { createHabit } = useHabits();
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<CreateHabitInput>({
-    name: "",
-    description: "",
-    frequency: "daily",
-    color: "",
-    icon: "",
-    goal: 30,
+
+  const form = useForm<CreateHabitInput>({
+    resolver: zodResolver(createHabitSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      frequency: "daily",
+      color: "",
+      icon: "",
+      goal: 30,
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSubmit = async (data: CreateHabitInput) => {
     try {
-      await onSubmit(formData);
+      await createHabit(data);
+      form.reset();
       setOpen(false);
-      setFormData({
-        name: "",
-        description: "",
-        frequency: "daily",
-        color: "",
-        icon: "",
-        goal: 30,
-      });
     } catch (error) {
       console.error("Error creating habit:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger || <Button>Create Habit</Button>}
+        {trigger || <Button>+ Add Habit</Button>}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Habit</DialogTitle>
           <DialogDescription>
-            Add a new habit to track your progress
+            Create a new habit to track your daily progress.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-              placeholder="Exercise"
-            />
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="30 minutes of exercise daily"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="frequency">Frequency</Label>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+          >
+            <Field>
+              <FieldLabel>Name *</FieldLabel>
               <Input
-                id="frequency"
-                value={formData.frequency}
-                onChange={(e) =>
-                  setFormData({ ...formData, frequency: e.target.value })
-                }
-                placeholder="daily"
+                {...form.register("name")}
+                placeholder="Exercise, Read, Meditate..."
               />
-            </div>
+              <FieldError>{form.formState.errors.name?.message}</FieldError>
+            </Field>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="goal">Goal (days)</Label>
+            <Field>
+              <FieldLabel>Description</FieldLabel>
+              <Textarea
+                {...form.register("description")}
+                placeholder="What is this habit about?"
+                rows={3}
+              />
+              <FieldDescription>
+                Optional: Add more details about your habit
+              </FieldDescription>
+              <FieldError>
+                {form.formState.errors.description?.message}
+              </FieldError>
+            </Field>
+
+            <Field>
+              <FieldLabel>Frequency *</FieldLabel>
               <Input
-                id="goal"
+                {...form.register("frequency")}
+                placeholder="daily, weekly, monthly..."
+              />
+              <FieldDescription>
+                How often do you want to do this habit?
+              </FieldDescription>
+              <FieldError>
+                {form.formState.errors.frequency?.message}
+              </FieldError>
+            </Field>
+
+            <Field>
+              <FieldLabel>Goal (days) *</FieldLabel>
+              <Input
                 type="number"
-                value={formData.goal}
-                onChange={(e) =>
-                  setFormData({ ...formData, goal: parseInt(e.target.value) })
-                }
-                min={1}
+                {...form.register("goal", { valueAsNumber: true })}
+                placeholder="30"
               />
-            </div>
-          </div>
+              <FieldDescription>
+                Number of days you want to maintain this habit
+              </FieldDescription>
+              <FieldError>{form.formState.errors.goal?.message}</FieldError>
+            </Field>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="icon">Icon (emoji)</Label>
+            <Field>
+              <FieldLabel>Color</FieldLabel>
               <Input
-                id="icon"
-                value={formData.icon}
-                onChange={(e) =>
-                  setFormData({ ...formData, icon: e.target.value })
-                }
-                placeholder="💪"
+                {...form.register("color")}
+                placeholder="blue, green, red..."
               />
-            </div>
+              <FieldDescription>
+                Optional: Choose a color theme for this habit
+              </FieldDescription>
+              <FieldError>{form.formState.errors.color?.message}</FieldError>
+            </Field>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="color">Color</Label>
-              <Input
-                id="color"
-                value={formData.color}
-                onChange={(e) =>
-                  setFormData({ ...formData, color: e.target.value })
-                }
-                placeholder="blue"
-              />
-            </div>
-          </div>
+            <Field>
+              <FieldLabel>Icon</FieldLabel>
+              <Input {...form.register("icon")} placeholder="💪, 📚, 🧘..." />
+              <FieldDescription>
+                Optional: Add an emoji or icon
+              </FieldDescription>
+              <FieldError>{form.formState.errors.icon?.message}</FieldError>
+            </Field>
 
-          <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create"}
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Creating..." : "Create Habit"}
             </Button>
           </div>
         </form>

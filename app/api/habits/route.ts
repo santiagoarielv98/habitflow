@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { createHabitSchema } from "@/lib/validations/habit";
+import { ZodError } from "zod";
 
 // GET /api/habits - Obtener todos los hábitos del usuario
 export async function GET(request: NextRequest) {
@@ -49,26 +51,25 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, frequency, color, icon, goal } = body;
 
-    if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
-    }
+    // Validar con Zod
+    const validatedData = createHabitSchema.parse(body);
 
     const habit = await prisma.habit.create({
       data: {
-        name,
-        description: description || null,
-        frequency: frequency || "daily",
-        color: color || null,
-        icon: icon || null,
-        goal: goal || 30,
+        ...validatedData,
         userId: session.user.id,
       },
     });
 
     return NextResponse.json(habit, { status: 201 });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Validation error", details: error.issues },
+        { status: 400 },
+      );
+    }
     console.error("Error creating habit:", error);
     return NextResponse.json(
       { error: "Failed to create habit" },

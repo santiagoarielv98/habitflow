@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { type Habit } from "@/hooks/use-habits";
+import { type Habit } from "@/lib/validations/habit";
 
 type HabitCardProps = {
   habit: Habit;

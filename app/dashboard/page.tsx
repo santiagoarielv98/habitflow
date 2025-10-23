@@ -17,7 +17,7 @@ import { HabitCard } from "@/components/habit-card";
 export default function DashboardPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
-  const { habits, loading, createHabit, deleteHabit } = useHabits();
+  const { habits, loading, deleteHabit } = useHabits();
 
   if (isPending) {
     return (
@@ -69,7 +69,7 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Your Habits</h2>
-            <HabitFormDialog onSubmit={createHabit} />
+            <HabitFormDialog />
           </div>
 
           {loading ? (

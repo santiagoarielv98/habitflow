@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { updateHabitSchema } from "@/lib/validations/habit";
+import { ZodError } from "zod";
 
 type Params = {
   params: Promise<{
@@ -58,7 +60,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const { id } = await params;
     const body = await request.json();
-    const { name, description, frequency, color, icon, goal, active } = body;
+
+    // Validar con Zod
+    const validatedData = updateHabitSchema.parse(body);
 
     const habit = await prisma.habit.findFirst({
       where: {
@@ -73,19 +77,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const updatedHabit = await prisma.habit.update({
       where: { id },
-      data: {
-        ...(name !== undefined && { name }),
-        ...(description !== undefined && { description }),
-        ...(frequency !== undefined && { frequency }),
-        ...(color !== undefined && { color }),
-        ...(icon !== undefined && { icon }),
-        ...(goal !== undefined && { goal }),
-        ...(active !== undefined && { active }),
-      },
+      data: validatedData,
     });
 
     return NextResponse.json(updatedHabit);
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Validation error", details: error.issues },
+        { status: 400 },
+      );
+    }
     console.error("Error updating habit:", error);
     return NextResponse.json(
       { error: "Failed to update habit" },
