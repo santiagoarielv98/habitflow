@@ -19,6 +19,7 @@ import {
 import { type Habit } from "@/lib/validations/habit";
 import { HabitTracker } from "./habit-tracker";
 import { HabitSummaryCard } from "./habit-summary-card";
+import { HabitEditDialog } from "./habit-edit-dialog";
 
 type HabitCardProps = {
   habit: Habit;
@@ -27,6 +28,7 @@ type HabitCardProps = {
 
 export function HabitCard({ habit, onDelete }: HabitCardProps) {
   const [trackerOpen, setTrackerOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this habit?")) {
@@ -62,6 +64,13 @@ export function HabitCard({ habit, onDelete }: HabitCardProps) {
                 <HabitTracker habit={habit} />
               </DialogContent>
             </Dialog>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditOpen(true)}
+            >
+              Edit
+            </Button>
             <Button variant="destructive" size="sm" onClick={handleDelete}>
               Delete
             </Button>
@@ -90,6 +99,13 @@ export function HabitCard({ habit, onDelete }: HabitCardProps) {
           )}
         </div>
       </CardContent>
+
+      {/* Dialog de edición */}
+      <HabitEditDialog
+        habit={habit}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
     </Card>
   );
 }
