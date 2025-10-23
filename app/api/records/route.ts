@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
  * @swagger
  * /api/records:
  *   post:
- *     summary: Create or update a record
+ *     summary: Create or update a record asd
  *     description: Creates a new record or updates an existing one for a specific date (upsert operation)
  *     tags:
  *       - Records

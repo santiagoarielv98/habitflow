@@ -4,12 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { updateRecordSchema } from "@/lib/validations/record";
 import { ZodError } from "zod";
 
+interface Params {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
 // GET /api/records/[id] - Obtener un record específico
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(request: NextRequest, { params }: Params) {
   try {
+    const { id } = await params;
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session) {
@@ -17,7 +21,7 @@ export async function GET(
     }
 
     const record = await prisma.record.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { habit: true },
     });
 
@@ -41,11 +45,9 @@ export async function GET(
 }
 
 // PATCH /api/records/[id] - Actualizar un record
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PATCH(request: NextRequest, { params }: Params) {
   try {
+    const { id } = await params;
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session) {
@@ -57,7 +59,7 @@ export async function PATCH(
 
     // Buscar el record con el hábito
     const existingRecord = await prisma.record.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { habit: true },
     });
 
@@ -71,7 +73,7 @@ export async function PATCH(
     }
 
     const record = await prisma.record.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     });
 
@@ -93,11 +95,9 @@ export async function PATCH(
 }
 
 // DELETE /api/records/[id] - Eliminar un record
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(request: NextRequest, { params }: Params) {
   try {
+    const { id } = await params;
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session) {
@@ -106,7 +106,7 @@ export async function DELETE(
 
     // Buscar el record con el hábito
     const existingRecord = await prisma.record.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { habit: true },
     });
 
@@ -120,7 +120,7 @@ export async function DELETE(
     }
 
     await prisma.record.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Record deleted successfully" });
