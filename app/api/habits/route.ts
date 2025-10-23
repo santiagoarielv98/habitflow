@@ -4,7 +4,38 @@ import { auth } from "@/lib/auth";
 import { createHabitSchema } from "@/lib/validations/habit";
 import { ZodError } from "zod";
 
-// GET /api/habits - Obtener todos los hábitos del usuario
+/**
+ * @swagger
+ * /api/habits:
+ *   get:
+ *     summary: Get all active habits for the authenticated user
+ *     description: Retrieves all active habits belonging to the current user, including their last 30 records
+ *     tags:
+ *       - Habits
+ *     security:
+ *       - BetterAuth: []
+ *     responses:
+ *       200:
+ *         description: List of habits
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Habit'
+ *       401:
+ *         description: Unauthorized - User not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -41,7 +72,48 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/habits - Crear un nuevo hábito
+/**
+ * @swagger
+ * /api/habits:
+ *   post:
+ *     summary: Create a new habit
+ *     description: Creates a new habit for the authenticated user
+ *     tags:
+ *       - Habits
+ *     security:
+ *       - BetterAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateHabitInput'
+ *     responses:
+ *       201:
+ *         description: Habit created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Habit'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized - User not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });

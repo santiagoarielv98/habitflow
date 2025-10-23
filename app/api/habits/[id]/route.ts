@@ -10,7 +10,49 @@ type Params = {
   }>;
 };
 
-// GET /api/habits/[id] - Obtener un hábito específico
+/**
+ * @swagger
+ * /api/habits/{id}:
+ *   get:
+ *     summary: Get a specific habit
+ *     description: Retrieves a single habit by ID with all its records
+ *     tags:
+ *       - Habits
+ *     security:
+ *       - BetterAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Habit ID
+ *     responses:
+ *       200:
+ *         description: Habit found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Habit'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Habit not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -49,7 +91,61 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 }
 
-// PATCH /api/habits/[id] - Actualizar un hábito
+/**
+ * @swagger
+ * /api/habits/{id}:
+ *   patch:
+ *     summary: Update a habit
+ *     description: Updates a habit's properties (all fields optional)
+ *     tags:
+ *       - Habits
+ *     security:
+ *       - BetterAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Habit ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateHabitInput'
+ *     responses:
+ *       200:
+ *         description: Habit updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Habit'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Habit not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -96,7 +192,53 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 }
 
-// DELETE /api/habits/[id] - Eliminar un hábito
+/**
+ * @swagger
+ * /api/habits/{id}:
+ *   delete:
+ *     summary: Delete a habit
+ *     description: Permanently deletes a habit and all its records
+ *     tags:
+ *       - Habits
+ *     security:
+ *       - BetterAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Habit ID
+ *     responses:
+ *       200:
+ *         description: Habit deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Habit deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Habit not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });

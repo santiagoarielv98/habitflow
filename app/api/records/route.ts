@@ -4,7 +4,57 @@ import { prisma } from "@/lib/prisma";
 import { createRecordSchema } from "@/lib/validations/record";
 import { ZodError } from "zod";
 
-// GET /api/records?habitId=xxx - Obtener records de un hábito
+/**
+ * @swagger
+ * /api/records:
+ *   get:
+ *     summary: Get records for a habit
+ *     description: Retrieves all records for a specific habit
+ *     tags:
+ *       - Records
+ *     security:
+ *       - BetterAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: habitId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the habit to get records for
+ *     responses:
+ *       200:
+ *         description: List of records
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Record'
+ *       400:
+ *         description: Missing habitId parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Habit not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -47,7 +97,54 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/records - Crear o actualizar un record
+/**
+ * @swagger
+ * /api/records:
+ *   post:
+ *     summary: Create or update a record
+ *     description: Creates a new record or updates an existing one for a specific date (upsert operation)
+ *     tags:
+ *       - Records
+ *     security:
+ *       - BetterAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateRecordInput'
+ *     responses:
+ *       201:
+ *         description: Record created or updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Record'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Habit not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });

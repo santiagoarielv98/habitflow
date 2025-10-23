@@ -26,25 +26,21 @@
   - Mapeo de rutas con @/
   - jsdom environment
 
-### 3. Documentación de API
-- [ ] Crear `API.md` con documentación completa
-- [ ] Documentar endpoints de hábitos:
-  - [ ] GET `/api/habits` - Listar hábitos
-  - [ ] POST `/api/habits` - Crear hábito
-  - [ ] PATCH `/api/habits/[id]` - Actualizar hábito
-  - [ ] DELETE `/api/habits/[id]` - Eliminar hábito
-- [ ] Documentar endpoints de registros:
-  - [ ] GET `/api/records?habitId=xxx` - Listar registros
-  - [ ] POST `/api/records` - Crear/actualizar registro
-  - [ ] PATCH `/api/records/[id]` - Actualizar registro
-  - [ ] DELETE `/api/records/[id]` - Eliminar registro
-- [ ] Documentar endpoints de autenticación:
-  - [ ] POST `/api/auth/sign-up` - Registro
-  - [ ] POST `/api/auth/sign-in` - Login
-  - [ ] POST `/api/auth/sign-out` - Logout
-  - [ ] POST `/api/auth/change-password` - Cambiar contraseña
-- [ ] Incluir ejemplos de request/response
-- [ ] Incluir códigos de error
+### 3. Documentación de API ✅ COMPLETADO
+- [x] Configurar Swagger con swagger-jsdoc y swagger-ui-react
+- [x] Crear schemas de componentes (Habit, Record, CreateInputs, UpdateInputs, Error)
+- [x] Documentar endpoints de hábitos:
+  - [x] GET `/api/habits` - Listar hábitos
+  - [x] POST `/api/habits` - Crear hábito
+  - [x] GET `/api/habits/[id]` - Obtener hábito específico
+  - [x] PATCH `/api/habits/[id]` - Actualizar hábito
+  - [x] DELETE `/api/habits/[id]` - Eliminar hábito
+- [x] Documentar endpoints de registros:
+  - [x] GET `/api/records?habitId=xxx` - Listar registros
+  - [x] POST `/api/records` - Crear/actualizar registro (upsert)
+- [x] Configurar autenticación con Better Auth
+- [x] Página de documentación interactiva en `/api-docs`
+- [x] Endpoint JSON de Swagger en `/api/swagger`
 
 ---
 
