@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { HabitStats } from "@/components/habit-stats";
 import type { Habit } from "@/lib/validations/habit";
+import { ScrollArea } from "./ui/scroll-area";
 
 type HabitTrackerProps = {
   habit: Habit;
@@ -161,7 +162,9 @@ export function HabitTracker({ habit }: HabitTrackerProps) {
         </TabsContent>
 
         <TabsContent value="stats">
-          <HabitStats habit={habit} records={records} />
+          <ScrollArea className="h-[80vh] min-h-0 pr-2.5">
+            <HabitStats habit={habit} records={records} />
+          </ScrollArea>
         </TabsContent>
       </Tabs>
 
