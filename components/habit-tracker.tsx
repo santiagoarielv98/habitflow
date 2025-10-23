@@ -40,6 +40,7 @@ export function HabitTracker({ habitId, habitName }: HabitTrackerProps) {
 
   // Verificar si un día está marcado como completado
   const isCompleted = (date: Date) => {
+    if (date === null) return false;
     return records.some((record) => {
       const recordDate = new Date(record.date);
       recordDate.setHours(0, 0, 0, 0);

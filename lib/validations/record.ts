@@ -22,7 +22,7 @@ export const recordSchema = z.object({
   completed: z.boolean(),
   notes: z.string().nullable(),
   createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
+  //   updatedAt: z.coerce.date(),
 });
 
 // Tipos inferidos
