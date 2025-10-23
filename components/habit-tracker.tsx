@@ -5,6 +5,7 @@ import { useRecords } from "@/hooks/use-records";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -12,14 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { HabitStats } from "@/components/habit-stats";
+import type { Habit } from "@/lib/validations/habit";
 
 type HabitTrackerProps = {
-  habitId: string;
-  habitName: string;
+  habit: Habit;
 };
 
-export function HabitTracker({ habitId, habitName }: HabitTrackerProps) {
-  const { records, loading, toggleRecord } = useRecords(habitId);
+export function HabitTracker({ habit }: HabitTrackerProps) {
+  const { records, loading, toggleRecord } = useRecords(habit.id);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState("");
 
@@ -65,7 +67,7 @@ export function HabitTracker({ habitId, habitName }: HabitTrackerProps) {
     const completed = !isCompleted(date);
     try {
       await toggleRecord({
-        habitId,
+        habitId: habit.id,
         date,
         completed,
         notes: completed ? notes : undefined,
@@ -89,63 +91,79 @@ export function HabitTracker({ habitId, habitName }: HabitTrackerProps) {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>{habitName} - Last 30 Days</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(7, 1fr)",
-              gap: "0.5rem",
-            }}
-          >
-            {last30Days.map((date) => {
-              const completed = isCompleted(date);
-              const isToday = date.toDateString() === new Date().toDateString();
-              const dayNotes = getNotes(date);
+      <Tabs defaultValue="tracker" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="tracker">📅 Tracker</TabsTrigger>
+          <TabsTrigger value="stats">📊 Statistics</TabsTrigger>
+        </TabsList>
 
-              return (
-                <button
-                  key={date.toISOString()}
-                  onClick={() => handleDayClick(date)}
-                  style={{
-                    padding: "0.75rem",
-                    borderRadius: "0.375rem",
-                    border: isToday ? "2px solid blue" : "1px solid #e5e7eb",
-                    backgroundColor: completed ? "#10b981" : "white",
-                    color: completed ? "white" : "black",
-                    cursor: "pointer",
-                    position: "relative",
-                  }}
-                  title={`${date.toLocaleDateString()}${dayNotes ? `\n${dayNotes}` : ""}`}
-                >
-                  <div style={{ fontSize: "0.75rem", fontWeight: "bold" }}>
-                    {date.getDate()}
-                  </div>
-                  <div style={{ fontSize: "0.625rem" }}>
-                    {date.toLocaleDateString("en", { weekday: "short" })}
-                  </div>
-                  {dayNotes && (
-                    <div
+        <TabsContent value="tracker">
+          <Card>
+            <CardHeader>
+              <CardTitle>{habit.name} - Last 30 Days</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(7, 1fr)",
+                  gap: "0.5rem",
+                }}
+              >
+                {last30Days.map((date) => {
+                  const completed = isCompleted(date);
+                  const isToday =
+                    date.toDateString() === new Date().toDateString();
+                  const dayNotes = getNotes(date);
+
+                  return (
+                    <button
+                      key={date.toISOString()}
+                      onClick={() => handleDayClick(date)}
                       style={{
-                        position: "absolute",
-                        top: "2px",
-                        right: "2px",
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        backgroundColor: completed ? "white" : "#3b82f6",
+                        padding: "0.75rem",
+                        borderRadius: "0.375rem",
+                        border: isToday
+                          ? "2px solid blue"
+                          : "1px solid #e5e7eb",
+                        backgroundColor: completed ? "#10b981" : "white",
+                        color: completed ? "white" : "black",
+                        cursor: "pointer",
+                        position: "relative",
                       }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                      title={`${date.toLocaleDateString()}${dayNotes ? `\n${dayNotes}` : ""}`}
+                    >
+                      <div style={{ fontSize: "0.75rem", fontWeight: "bold" }}>
+                        {date.getDate()}
+                      </div>
+                      <div style={{ fontSize: "0.625rem" }}>
+                        {date.toLocaleDateString("en", { weekday: "short" })}
+                      </div>
+                      {dayNotes && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "2px",
+                            right: "2px",
+                            width: "6px",
+                            height: "6px",
+                            borderRadius: "50%",
+                            backgroundColor: completed ? "white" : "#3b82f6",
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="stats">
+          <HabitStats habit={habit} records={records} />
+        </TabsContent>
+      </Tabs>
 
       {/* Dialog para agregar/editar notas */}
       <Dialog

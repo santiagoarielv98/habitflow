@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { type Habit } from "@/lib/validations/habit";
 import { HabitTracker } from "./habit-tracker";
+import { HabitSummaryCard } from "./habit-summary-card";
 
 type HabitCardProps = {
   habit: Habit;
@@ -32,6 +33,9 @@ export function HabitCard({ habit, onDelete }: HabitCardProps) {
       await onDelete(habit.id);
     }
   };
+
+  // Obtener records del hábito (los últimos 30 que ya tiene cargados)
+  const records = habit.records || [];
 
   return (
     <Card>
@@ -55,7 +59,7 @@ export function HabitCard({ habit, onDelete }: HabitCardProps) {
                 <DialogHeader>
                   <DialogTitle>Track Progress</DialogTitle>
                 </DialogHeader>
-                <HabitTracker habitId={habit.id} habitName={habit.name} />
+                <HabitTracker habit={habit} />
               </DialogContent>
             </Dialog>
             <Button variant="destructive" size="sm" onClick={handleDelete}>
@@ -64,21 +68,28 @@ export function HabitCard({ habit, onDelete }: HabitCardProps) {
           </div>
         </div>
       </CardHeader>
-      {habit.description && (
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{habit.description}</p>
-          <div className="flex gap-4 mt-4 text-sm">
-            <div>
-              <span className="font-medium">Goal:</span> {habit.goal} days
-            </div>
-            {habit.color && (
-              <div>
-                <span className="font-medium">Color:</span> {habit.color}
-              </div>
-            )}
+      <CardContent>
+        {habit.description && (
+          <p className="text-sm text-muted-foreground mb-4">
+            {habit.description}
+          </p>
+        )}
+
+        {/* Resumen de estadísticas */}
+        <HabitSummaryCard habit={habit} records={records} />
+
+        {/* Info adicional */}
+        <div className="flex gap-4 mt-4 text-sm text-muted-foreground">
+          <div>
+            <span className="font-medium">Goal:</span> {habit.goal} days
           </div>
-        </CardContent>
-      )}
+          {habit.color && (
+            <div>
+              <span className="font-medium">Color:</span> {habit.color}
+            </div>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 }
