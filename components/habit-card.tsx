@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { type Habit } from "@/lib/validations/habit";
+import { HabitTracker } from "./habit-tracker";
 
 type HabitCardProps = {
   habit: Habit;
@@ -16,6 +25,8 @@ type HabitCardProps = {
 };
 
 export function HabitCard({ habit, onDelete }: HabitCardProps) {
+  const [trackerOpen, setTrackerOpen] = useState(false);
+
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this habit?")) {
       await onDelete(habit.id);
@@ -33,9 +44,24 @@ export function HabitCard({ habit, onDelete }: HabitCardProps) {
               <CardDescription>{habit.frequency}</CardDescription>
             </div>
           </div>
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
-            Delete
-          </Button>
+          <div className="flex gap-2">
+            <Dialog open={trackerOpen} onOpenChange={setTrackerOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Track
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Track Progress</DialogTitle>
+                </DialogHeader>
+                <HabitTracker habitId={habit.id} habitName={habit.name} />
+              </DialogContent>
+            </Dialog>
+            <Button variant="destructive" size="sm" onClick={handleDelete}>
+              Delete
+            </Button>
+          </div>
         </div>
       </CardHeader>
       {habit.description && (

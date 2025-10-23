@@ -14,6 +14,7 @@ async function fetchHabits(): Promise<Habit[]> {
     throw new Error("Failed to fetch habits");
   }
   const data = await response.json();
+  console.log("Fetched habits data:", z.array(habitSchema).parse(data));
   return z.array(habitSchema).parse(data);
 }
 
