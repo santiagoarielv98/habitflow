@@ -1,6 +1,12 @@
 import { PrismaClient } from "../lib/generated/prisma";
+import "dotenv/config";
+import { auth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
+
+const email = "demo@example.com";
+const password = "password";
+const name = "Demo User";
 
 async function main() {
   console.log("🌱 Starting seed...");
@@ -9,8 +15,19 @@ async function main() {
   );
   console.log("⚠️  Make sure you have created an account via sign-up first!\n");
 
+  const { user: createdUser } = await auth.api.signUpEmail({
+    returnHeaders: false,
+    body: {
+      email,
+      password,
+      name,
+    },
+  });
+  console.log(`👤 Created user: ${createdUser.email}\n`);
+
   // Buscar el primer usuario o pedir que creen uno
   const user = await prisma.user.findFirst({
+    where: { email },
     orderBy: { createdAt: "asc" },
   });
 
@@ -491,8 +508,8 @@ async function main() {
   console.log(`  - Habits: ${createdHabits.length}`);
   console.log(`  - Records: ${totalRecords}`);
   console.log(`\n🔐 Login credentials:`);
-  console.log(`  Email: santiago@habitflow.dev`);
-  console.log(`  Password: password123`);
+  console.log(`  Email: ${email}`);
+  console.log(`  Password: ${password}`);
 }
 
 main()
@@ -501,5 +518,6 @@ main()
     process.exit(1);
   })
   .finally(async () => {
+    console.log(`🔌 Disconnecting from database...`);
     await prisma.$disconnect();
   });
